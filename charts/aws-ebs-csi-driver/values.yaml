@@ -27,12 +27,6 @@ sidecars:
     repository: k8s.gcr.io/sig-storage/csi-node-driver-registrar
     tag: "v2.1.0"
 
-snapshotController:
-  repository: k8s.gcr.io/sig-storage/snapshot-controller
-  tag: "v3.0.3"
-  podAnnotations: {}
-  podLabels: {}
-
 proxy:
   http_proxy:
   no_proxy:
@@ -135,10 +129,6 @@ serviceAccount:
   controller:
     create: true # A service account will be created for you if set to true. Set to false if you want to use your own.
     name: ebs-csi-controller-sa # Name of the service-account to be used/created.
-    annotations: {}
-  snapshot:
-    create: true
-    name: ebs-snapshot-controller
     annotations: {}
   node:
     create: true

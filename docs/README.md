@@ -127,6 +127,7 @@ Following sections are Kubernetes specific. If you are Kubernetes user, use foll
   * Enable flag `--allow-privileged=true` for `kubelet` and `kube-apiserver`
   * Enable `kube-apiserver` feature gates `--feature-gates=CSINodeInfo=true,CSIDriverRegistry=true,CSIBlockVolume=true,VolumeSnapshotDataSource=true`
   * Enable `kubelet` feature gates `--feature-gates=CSINodeInfo=true,CSIDriverRegistry=true,CSIBlockVolume=true`
+* If you intend to use the csi-snapshotter functionality you will need to first install the [CSI Snapshotter](https://github.com/kubernetes-csi/external-snapshotter)
 
 ## Installation
 #### Set up driver permission
