@@ -54,8 +54,8 @@ spec:
           args:
             - node
             - --endpoint=$(CSI_ENDPOINT)
-            {{- if .Values.volumeAttachLimit }}
-            - --volume-attach-limit={{ .Values.volumeAttachLimit }}
+            {{- with .Values.node.volumeAttachLimit }}
+            - --volume-attach-limit={{ . }}
             {{- end }}
             - --logtostderr
             - --v=5
@@ -94,14 +94,8 @@ spec:
             timeoutSeconds: 3
             periodSeconds: 10
             failureThreshold: 5
-          {{- if .Values.node.resources }}
-          {{- with .Values.node.resources }}
+          {{- with default .Values.node.resources .Values.node.containerResources.ebsPlugin }}
           resources: {{ toYaml . | nindent 12 }}
-          {{- end }}
-          {{- else }}
-          {{- with .Values.resources }}
-          resources: {{ toYaml . | nindent 12 }}
-          {{- end }}
           {{- end }}
         - name: node-driver-registrar
           image: {{ printf "%s:%s" .Values.sidecars.nodeDriverRegistrarImage.repository .Values.sidecars.nodeDriverRegistrarImage.tag }}
@@ -127,14 +121,8 @@ spec:
               mountPath: C:\csi
             - name: registration-dir
               mountPath: C:\registration
-          {{- if .Values.node.resources }}
-          {{- with .Values.node.resources }}
+          {{- with default .Values.node.resources .Values.node.containerResources.nodeDriverRegistrar }}
           resources: {{ toYaml . | nindent 12 }}
-          {{- end }}
-          {{- else }}
-          {{- with .Values.resources }}
-          resources: {{ toYaml . | nindent 12 }}
-          {{- end }}
           {{- end }}
         - name: liveness-probe
           image: {{ printf "%s:%s" .Values.sidecars.livenessProbeImage.repository .Values.sidecars.livenessProbeImage.tag }}
@@ -143,14 +131,8 @@ spec:
           volumeMounts:
             - name: plugin-dir
               mountPath: C:\csi
-          {{- if .Values.node.resources }}
-          {{- with .Values.node.resources }}
+          {{- with default .Values.node.resources .Values.node.containerResources.liveness }}
           resources: {{ toYaml . | nindent 12 }}
-          {{- end }}
-          {{- else }}
-          {{- with .Values.resources }}
-          resources: {{ toYaml . | nindent 12 }}
-          {{- end }}
           {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:

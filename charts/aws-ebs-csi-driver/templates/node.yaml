@@ -60,7 +60,7 @@ spec:
           args:
             - node
             - --endpoint=$(CSI_ENDPOINT)
-            {{- with default .Values.volumeAttachLimit .Values.node.volumeAttachLimit }}
+            {{- with .Values.node.volumeAttachLimit }}
             - --volume-attach-limit={{ . }}
             {{- end }}
             - --logtostderr
@@ -98,7 +98,7 @@ spec:
             timeoutSeconds: 3
             periodSeconds: 10
             failureThreshold: 5
-          {{- with default .Values.resources (default .Values.node.resources .Values.node.containerResources.ebsPlugin) }}
+          {{- with default .Values.node.resources .Values.node.containerResources.ebsPlugin }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -124,7 +124,7 @@ spec:
               mountPath: /csi
             - name: registration-dir
               mountPath: /registration
-          {{- with default .Values.resources (default .Values.node.resources .Values.node.containerResources.nodeDriverRegistrar) }}
+          {{- with default .Values.node.resources .Values.node.containerResources.nodeDriverRegistrar }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -135,7 +135,7 @@ spec:
           volumeMounts:
             - name: plugin-dir
               mountPath: /csi
-          {{- with default .Values.resources (default .Values.node.resources .Values.node.containerResources.liveness) }}
+          {{- with default .Values.node.resources .Values.node.containerResources.liveness }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}

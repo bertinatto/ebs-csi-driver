@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "aws-ebs-csi-driver.labels" . | nindent 4 }}
 spec:
-  replicas: {{ default .Values.replicaCount .Values.controller.replicaCount }}
+  replicas: {{ .Values.controller.replicaCount }}
   selector:
     matchLabels:
       app: ebs-csi-controller
@@ -22,19 +22,16 @@ spec:
       {{- if .Values.controller.podAnnotations }}
       annotations:
         {{- toYaml .Values.controller.podAnnotations | nindent 8 }}
-      {{- else if .Values.podAnnotations}}
-      annotations:
-        {{- toYaml .Values.podAnnotations | nindent 8 }}
       {{- end }}
     spec:
       nodeSelector:
         kubernetes.io/os: linux
-        {{- with default .Values.nodeSelector .Values.controller.nodeSelector }}
+        {{- with .Values.controller.nodeSelector }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       serviceAccountName: {{ .Values.serviceAccount.controller.name }}
-      priorityClassName: {{ default .Values.priorityClassName .Values.controller.priorityClassName }}
-      {{- with default .Values.affinity .Values.controller.affinity }}
+      priorityClassName: {{ .Values.controller.priorityClassName }}
+      {{- with default .Values.controller.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -44,13 +41,13 @@ spec:
         - operator: Exists
           effect: NoExecute
           tolerationSeconds: 300
-        {{- with default .Values.tolerations .Values.controller.tolerations }}
+        {{- with .Values.controller.tolerations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- if or .Values.controller.topologySpreadConstraints .Values.topologySpreadConstraints }}
+      {{- if .Values.controller.topologySpreadConstraints }}
       {{- $tscLabelSelector := dict "labelSelector" ( dict "matchLabels" ( dict "app" "ebs-csi-controller" ) ) }}
       {{- $constraints := list }}
-      {{- range default .Values.topologySpreadConstraints .Values.controller.topologySpreadConstraints }}
+      {{- range .Values.controller.topologySpreadConstraints }}
         {{- $constraints = mustAppend $constraints (mergeOverwrite . $tscLabelSelector) }}
       {{- end }}
       topologySpreadConstraints:
@@ -67,10 +64,10 @@ spec:
             # - {all,controller,node} # specify the driver mode
             {{- end }}
             - --endpoint=$(CSI_ENDPOINT)
-            {{- if or .Values.controller.extraVolumeTags .Values.extraVolumeTags }}
+            {{- if .Values.controller.extraVolumeTags }}
               {{- include "aws-ebs-csi-driver.extra-volume-tags" . | nindent 12 }}
             {{- end }}
-            {{- with default .Values.k8sTagClusterId .Values.controller.k8sTagClusterId }}
+            {{- with .Values.controller.k8sTagClusterId }}
             - --k8s-tag-cluster-id={{ . }}
             {{- end }}
             {{- with .Values.controller.httpEndpoint }}
@@ -97,7 +94,7 @@ spec:
                   name: aws-secret
                   key: access_key
                   optional: true
-            {{- with default .Values.region .Values.controller.region }}
+            {{- with .Values.controller.region }}
             - name: AWS_REGION
               value: {{ . }}
             {{- end }}
@@ -136,7 +133,7 @@ spec:
             timeoutSeconds: 3
             periodSeconds: 10
             failureThreshold: 5
-          {{- with default .Values.resources (default .Values.controller.resources .Values.controller.containerResources.ebsPlugin) }}
+          {{- with default .Values.controller.resources .Values.controller.containerResources.ebsPlugin }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -146,7 +143,7 @@ spec:
             - --csi-address=$(ADDRESS)
             - --v=5
             - --feature-gates=Topology=true
-            {{- if or .Values.controller.extraCreateMetadata .Values.extraCreateMetadata }}
+            {{- if .Values.controller.extraCreateMetadata }}
             - --extra-create-metadata
             {{- end}}
             - --leader-election=true
@@ -163,7 +160,7 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
-          {{- with default .Values.resources (default .Values.controller.resources .Values.controller.containerResources.provisioner) }}
+          {{- with default .Values.controller.resources .Values.controller.containerResources.provisioner }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -185,7 +182,7 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
-          {{- with default .Values.resources (default .Values.controller.resources .Values.controller.containerResources.attacher) }}
+          {{- with default .Values.controller.resources .Values.controller.containerResources.attacher }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -207,7 +204,7 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
-          {{- with default .Values.resources (default .Values.controller.resources .Values.controller.containerResources.snapshotter) }}
+          {{- with default .Values.controller.resources .Values.controller.containerResources.snapshotter }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -230,7 +227,7 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
-          {{- with default .Values.resources (default .Values.controller.resources .Values.controller.containerResources.resizer) }}
+          {{- with default .Values.controller.resources .Values.controller.containerResources.resizer }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -241,7 +238,7 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
-          {{- with default .Values.resources (default .Values.controller.resources .Values.controller.containerResources.liveness) }}
+          {{- with default .Values.controller.resources .Values.controller.containerResources.liveness }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}

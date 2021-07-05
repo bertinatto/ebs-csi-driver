@@ -59,9 +59,8 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Convert the `--extra-volume-tags` command line arg from a map.
 */}}
 {{- define "aws-ebs-csi-driver.extra-volume-tags" -}}
-{{- $evt := default .Values.extraVolumeTags .Values.controller.extraVolumeTags }}
 {{- $result := dict "pairs" (list) -}}
-{{- range $key, $value := $evt -}}
+{{- range $key, $value := .Values.controller.extraVolumeTags -}}
 {{- $noop := printf "%s=%s" $key $value | append $result.pairs | set $result "pairs" -}}
 {{- end -}}
 {{- if gt (len $result.pairs) 0 -}}

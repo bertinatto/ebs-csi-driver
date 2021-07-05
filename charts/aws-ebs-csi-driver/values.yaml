@@ -44,20 +44,6 @@ fullnameOverride:
 # True if enable volume snapshot
 enableVolumeSnapshot: false
 
-# Moving to values under controller
-affinity: {}
-extraCreateMetadata: true
-extraVolumeTags: {}
-k8sTagClusterId:
-nodeSelector: {}
-podAnnotations: {}
-priorityClassName: "system-cluster-critical"
-region:
-replicaCount: 2
-resources: {}
-tolerations: []
-topologySpreadConstraints: []
-
 controller:
   affinity: {}
   # True if enable volume scheduling for dynamic volume provisioning
@@ -84,13 +70,13 @@ controller:
   nodeSelector: {}
   podAnnotations: {}
   podLabels: {}
-  priorityClassName:
+  priorityClassName: system-cluster-critical
   # AWS region to use. If not specified then the region will be looked up via the AWS EC2 metadata
   # service.
   # ---
   # region: us-east-1
   region:
-  replicaCount:
+  replicaCount: 2
   resources: {}
   containerResources:
     ebsPlugin: {}
@@ -125,10 +111,6 @@ controller:
   #    whenUnsatisfiable: ScheduleAnyway
   topologySpreadConstraints: []
 
-# Moving to values under node
-# The "maximum number of attachable volumes" per node
-volumeAttachLimit:
-
 node:
   env:
     ebsPlugin: []
@@ -146,6 +128,7 @@ node:
     ebsPlugin: {}
     nodeDriverRegistrar: {}
     liveness: {}
+  # The "maximum number of attachable volumes" per node
   volumeAttachLimit:
 
 serviceAccount:

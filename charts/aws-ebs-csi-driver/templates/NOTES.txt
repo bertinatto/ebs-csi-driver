@@ -1,39 +1,3 @@
 To verify that aws-ebs-csi-driver has started, run:
 
     kubectl get pod -n {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "aws-ebs-csi-driver.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
-
-
-WARNING: The following values have been deprecated in favor of moving them into the controller or node groups.  They will be removed in a subsequent release.
-
-affinity:
-extraCreateMetadata:
-extraVolumeTags:
-k8sTagClusterId:
-nodeSelector:
-podAnnotations:
-priorityClassName:
-region:
-replicaCount:
-resources:
-tolerations:
-topologySpreadConstraints:
-volumeAttachLimit:
-
-are moving to
-
-controller:
-  affinity:
-  extraCreateMetadata:
-  extraVolumeTags:
-  k8sTagClusterId:
-  nodeSelector:
-  podAnnotations:
-  priorityClassName:
-  region:
-  replicaCount:
-  resources:
-  tolerations:
-  topologySpreadConstraints:
-
-node:
-  volumeAttachLimit:
