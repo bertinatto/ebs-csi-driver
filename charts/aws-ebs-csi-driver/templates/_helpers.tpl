@@ -61,7 +61,7 @@ Convert the `--extra-volume-tags` command line arg from a map.
 {{- define "aws-ebs-csi-driver.extra-volume-tags" -}}
 {{- $result := dict "pairs" (list) -}}
 {{- range $key, $value := .Values.controller.extraVolumeTags -}}
-{{- $noop := printf "%s=%s" $key $value | append $result.pairs | set $result "pairs" -}}
+{{- $noop := printf "%s=%v" $key $value | append $result.pairs | set $result "pairs" -}}
 {{- end -}}
 {{- if gt (len $result.pairs) 0 -}}
 {{- printf "%s=%s" "- --extra-volume-tags" (join "," $result.pairs) -}}
