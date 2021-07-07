@@ -186,7 +186,7 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-{{- if or .Values.enableVolumeSnapshot (.Capabilities.APIVersions.Has "snapshot.storage.k8s.io/v1") }}
+        {{- if .Capabilities.APIVersions.Has "snapshot.storage.k8s.io/v1" }}
         - name: csi-snapshotter
           image: {{ printf "%s:%s" .Values.sidecars.snapshotterImage.repository .Values.sidecars.snapshotterImage.tag }}
           args:
@@ -208,7 +208,7 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-{{- end }}
+        {{- end }}
         - name: csi-resizer
           image: {{ printf "%s:%s" .Values.sidecars.resizerImage.repository .Values.sidecars.resizerImage.tag }}
           imagePullPolicy: Always

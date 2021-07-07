@@ -1,4 +1,3 @@
-enableVolumeSnapshot: true
 controller:
   logLevel: 5
 node:

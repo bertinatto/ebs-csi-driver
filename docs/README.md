@@ -177,6 +177,26 @@ helm upgrade --install aws-ebs-csi-driver \
     aws-ebs-csi-driver/aws-ebs-csi-driver
 ```
 
+##### Upgrading from version 1.X to 2.X of the helm chart
+Version 2.0.0 remove support for helm v2 and now requires helm v3 or above
+
+The [CSI Snapshotter](https://github.com/kubernetes-csi/external-snapshotter) controller and CRDs will no longer be installed as part of this chart and moving forward will be a prerequisite of using the snap shotting functionality.
+
+The following deprecated values have been removed, and you should now use their counterparts under the `controller` and `node` maps which have been available since chart version 1.1.0
+* affinity
+* extraCreateMetadata
+* extraVolumeTags
+* k8sTagClusterId
+* nodeSelector
+* podAnnotations
+* priorityClassName
+* region
+* replicaCount
+* resources
+* tolerations
+* topologySpreadConstraints
+* volumeAttachLimit
+
 #### Deploy driver with debug mode
 To view driver debug logs, run the CSI driver with `-v=5` command line option
 

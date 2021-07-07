@@ -35,9 +35,6 @@ imagePullSecrets: []
 nameOverride:
 fullnameOverride:
 
-# True if enable volume snapshot
-enableVolumeSnapshot: false
-
 controller:
   affinity: {}
   # True if enable volume scheduling for dynamic volume provisioning
