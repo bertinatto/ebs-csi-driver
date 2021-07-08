@@ -179,7 +179,7 @@ type VolumeSnapshotStatus struct {
 	// This field could be helpful to upper level controllers(i.e., application controller)
 	// to decide whether they should continue on waiting for the snapshot to be created
 	// based on the type of error reported.
-	// The snapshot controller will keep retrying when an error occurrs during the
+	// The snapshot controller will keep retrying when an error occurs during the
 	// snapshot creation. Upon success, this error field will be cleared.
 	// +optional
 	Error *VolumeSnapshotError `json:"error,omitempty" protobuf:"bytes,5,opt,name=error,casttype=VolumeSnapshotError"`
