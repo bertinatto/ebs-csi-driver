@@ -107,7 +107,7 @@ spec:
           args:
             - --csi-address=$(ADDRESS)
             - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
-            - --v=5
+            - --v={{ .Values.node.logLevel }}
           env:
             - name: ADDRESS
               value: /csi/csi.sock
@@ -132,6 +132,7 @@ spec:
           image: {{ printf "%s:%s" .Values.sidecars.livenessProbeImage.repository .Values.sidecars.livenessProbeImage.tag }}
           args:
             - --csi-address=/csi/csi.sock
+            - --v={{ .Values.node.logLevel }}
           volumeMounts:
             - name: plugin-dir
               mountPath: /csi
