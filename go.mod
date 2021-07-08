@@ -7,7 +7,7 @@ require (
 	github.com/golang/mock v1.5.0
 	github.com/golang/protobuf v1.4.3
 	github.com/imdario/mergo v0.3.7 // indirect
-	github.com/kubernetes-csi/csi-proxy/client v0.2.2
+	github.com/kubernetes-csi/csi-proxy/client v1.0.0-rc.1
 	github.com/kubernetes-csi/csi-test v2.0.0+incompatible
 	github.com/kubernetes-csi/external-snapshotter/client/v4 v4.0.0
 	github.com/onsi/ginkgo v1.11.0

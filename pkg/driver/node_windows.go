@@ -22,10 +22,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
-	diskapi "github.com/kubernetes-csi/csi-proxy/client/api/disk/v1beta2"
-	diskclient "github.com/kubernetes-csi/csi-proxy/client/groups/disk/v1beta2"
+	diskapi "github.com/kubernetes-csi/csi-proxy/client/api/disk/v1"
+	diskclient "github.com/kubernetes-csi/csi-proxy/client/groups/disk/v1"
 	"github.com/kubernetes-sigs/aws-ebs-csi-driver/pkg/mounter"
 	"k8s.io/klog"
 )
@@ -49,10 +50,10 @@ func (d *nodeService) findDevicePath(devicePath, volumeID, _ string) (string, er
 
 	foundDiskNumber := ""
 	for diskNumber, diskID := range diskIDs {
-		serialNumber := diskID.Identifiers["serialNumber"]
+		serialNumber := diskID.GetSerialNumber()
 		cleanVolumeID := strings.ReplaceAll(volumeID, "-", "")
 		if strings.Contains(serialNumber, cleanVolumeID) {
-			foundDiskNumber = diskNumber
+			foundDiskNumber = strconv.Itoa(int(diskNumber))
 			break
 		}
 	}

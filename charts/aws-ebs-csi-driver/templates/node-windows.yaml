@@ -77,11 +77,11 @@ spec:
             - name: plugin-dir
               mountPath: C:\csi
             - name: csi-proxy-disk-pipe
-              mountPath: \\.\pipe\csi-proxy-disk-v1beta2
+              mountPath: \\.\pipe\csi-proxy-disk-v1
             - name: csi-proxy-volume-pipe
-              mountPath: \\.\pipe\csi-proxy-volume-v1beta2
+              mountPath: \\.\pipe\csi-proxy-volume-v1
             - name: csi-proxy-filesystem-pipe
-              mountPath: \\.\pipe\csi-proxy-filesystem-v1beta1
+              mountPath: \\.\pipe\csi-proxy-filesystem-v1
           ports:
             - name: healthz
               containerPort: 9808
@@ -173,13 +173,13 @@ spec:
             type: Directory
         - name: csi-proxy-disk-pipe
           hostPath:
-            path: \\.\pipe\csi-proxy-disk-v1beta2
+            path: \\.\pipe\csi-proxy-disk-v1
             type: ""
         - name: csi-proxy-volume-pipe
           hostPath:
-            path: \\.\pipe\csi-proxy-volume-v1beta2
+            path: \\.\pipe\csi-proxy-volume-v1
             type: ""
         - name: csi-proxy-filesystem-pipe
           hostPath:
-            path: \\.\pipe\csi-proxy-filesystem-v1beta1
+            path: \\.\pipe\csi-proxy-filesystem-v1
             type: ""
