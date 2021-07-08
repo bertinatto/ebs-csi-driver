@@ -56,6 +56,9 @@ const (
 	// EncryptedKey represents key for whether filesystem is encrypted
 	EncryptedKey = "encrypted"
 
+	// MultiAttachEnabled respresents the ability to attach a volume to multiple instances
+	MultiAttachEnabled = "multiattachenabled"
+
 	// KmsKeyId represents key for KMS encryption key
 	KmsKeyIDKey = "kmskeyid"
 
