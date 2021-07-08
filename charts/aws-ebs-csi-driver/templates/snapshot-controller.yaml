@@ -57,7 +57,7 @@ spec:
             {{- include "aws-ebs-csi-driver.http-proxy" . | nindent 12 }}
           {{- end }}
           args:
-            - --v=5
+            - --v={{ .Values.snapshotController.logLevel }}
             - --leader-election=false
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:

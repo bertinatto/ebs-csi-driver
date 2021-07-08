@@ -58,7 +58,7 @@ spec:
             - --volume-attach-limit={{ .Values.volumeAttachLimit }}
             {{- end }}
             - --logtostderr
-            - --v=5
+            - --v={{ .Values.nodeWindows.logLevel }}
           env:
             - name: CSI_ENDPOINT
               value: unix:/csi/csi.sock
@@ -108,7 +108,7 @@ spec:
           args:
             - --csi-address=$(ADDRESS)
             - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
-            - --v=5
+            - --v={{ .Values.nodeWindows.logLevel }}
           env:
             - name: ADDRESS
               value: unix:/csi/csi.sock
@@ -140,6 +140,7 @@ spec:
           image: {{ printf "%s:%s" .Values.sidecars.livenessProbeImage.repository .Values.sidecars.livenessProbeImage.tag }}
           args:
             - --csi-address=unix:/csi/csi.sock
+            - --v={{ .Values.nodeWindows.logLevel }}
           volumeMounts:
             - name: plugin-dir
               mountPath: C:\csi

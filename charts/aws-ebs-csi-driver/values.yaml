@@ -129,6 +129,9 @@ controller:
 # The "maximum number of attachable volumes" per node
 volumeAttachLimit:
 
+snapshotController:
+  logLevel: 2
+
 node:
   env:
     ebsPlugin: []
@@ -147,6 +150,9 @@ node:
     nodeDriverRegistrar: {}
     liveness: {}
   volumeAttachLimit:
+
+nodeWindows:
+  logLevel: 2
 
 serviceAccount:
   controller:
