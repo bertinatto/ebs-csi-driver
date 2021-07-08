@@ -79,6 +79,10 @@ The new tag should trigger a new Github release. Verify that it has run by going
 - Source code (zip)
 - Source code (tar.gz)
 
+## Verify the helm chart release
+
+Visit the [Releases](https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases) pages to verify we have a new helm chart release.
+
 ## Promote the new images on GCR
 
 Promote the new images from the staging repo by sending a PR to the kubernetes/k8s.io repo. Here's an [example PR](https://github.com/kubernetes/k8s.io/pull/1606).
@@ -86,8 +90,3 @@ Promote the new images from the staging repo by sending a PR to the kubernetes/k
 ## Merge the release commit to the main branch
 
 Once the images promoted, send a PR to merge the release commit to the main branch.
-
-## Verify the helm chart release
-
-Visit the [Releases](https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases) pages to verify we have a new helm chart release.
-
