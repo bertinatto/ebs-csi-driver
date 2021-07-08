@@ -30,8 +30,7 @@ gcloud auth configure-docker
 loudecho "Set up Docker Buildx"
 # See https://github.com/docker/setup-buildx-action
 # and https://github.com/kubernetes-csi/csi-release-tools/blob/master/build.make#L132
-DOCKER_CLI_EXPERIMENTAL=enabled
-export DOCKER_CLI_EXPERIMENTAL
+export DOCKER_CLI_EXPERIMENTAL=enabled
 trap "docker buildx rm multiarchimage-buildertest" EXIT
 docker buildx create --use --name multiarchimage-buildertest
 
@@ -39,20 +38,15 @@ loudecho "Set up QEMU"
 # See https://github.com/docker/setup-qemu-action
 docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
-loudecho "Build and push debian target"
-docker buildx build \
-  --tag="${REGISTRY_NAME}"/aws-ebs-csi-driver:"${GIT_TAG}" \
-  --platform=linux/arm64,linux/amd64 \
-  --progress=plain \
-  --push=true \
-  --target=debian-base \
-  .
+loudecho "Push manifest list containing debian and windows based images to GCR"
+export REGISTRY=$REGISTRY_NAME
+export TAG=$GIT_TAG
+export ALL_OSVERSION_linux=debian
+make all-push
 
-loudecho "Build and push amazonlinux target"
-docker buildx build \
-  --tag="${REGISTRY_NAME}"/aws-ebs-csi-driver:"${GIT_TAG}"-amazonlinux \
-  --platform=linux/arm64,linux/amd64 \
-  --progress=plain \
-  --push=true \
-  --target=amazonlinux \
-  .
+loudecho "Push manifest containing amazon based image to GCR"
+export REGISTRY=$REGISTRY_NAME
+export TAG=$GIT_TAG-amazonlinux
+export ALL_OSVERSION_linux=amazon
+export ALL_OS=linux
+make all-push

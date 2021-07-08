@@ -12,28 +12,103 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PKG=github.com/kubernetes-sigs/aws-ebs-csi-driver
-IMAGE?=amazon/aws-ebs-csi-driver
 VERSION=v1.1.1
-VERSION_AMAZONLINUX=$(VERSION)-amazonlinux
+
+PKG=github.com/kubernetes-sigs/aws-ebs-csi-driver
 GIT_COMMIT?=$(shell git rev-parse HEAD)
-BUILD_DATE?=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+BUILD_DATE?=$(shell date -u -Iseconds)
+
 LDFLAGS?="-X ${PKG}/pkg/driver.driverVersion=${VERSION} -X ${PKG}/pkg/cloud.driverVersion=${VERSION} -X ${PKG}/pkg/driver.gitCommit=${GIT_COMMIT} -X ${PKG}/pkg/driver.buildDate=${BUILD_DATE} -s -w"
+
 GO111MODULE=on
 GOPROXY=direct
 GOPATH=$(shell go env GOPATH)
 GOOS=$(shell go env GOOS)
 GOBIN=$(shell pwd)/bin
 
+REGISTRY?=gcr.io/k8s-staging-provider-aws
+IMAGE?=$(REGISTRY)/aws-ebs-csi-driver
+TAG?=$(GIT_COMMIT)
+
+OUTPUT_TYPE?=docker
+
+OS?=linux
+ARCH?=amd64
+OSVERSION?=debian
+
+ALL_OS?=linux windows
+ALL_ARCH_linux?=amd64 arm64
+ALL_OSVERSION_linux?=debian
+ALL_OS_ARCH_OSVERSION_linux=$(foreach arch, $(ALL_ARCH_linux), $(foreach osversion, ${ALL_OSVERSION_linux}, linux-$(arch)-${osversion}))
+ALL_ARCH_windows?=amd64
+ALL_OSVERSION_windows?=1809
+ALL_OS_ARCH_OSVERSION_windows=$(foreach arch, $(ALL_ARCH_windows), $(foreach osversion, ${ALL_OSVERSION_windows}, windows-$(arch)-${osversion}))
+ALL_OS_ARCH_OSVERSION=$(foreach os, $(ALL_OS), ${ALL_OS_ARCH_OSVERSION_${os}})
+
+# split words on hyphen, access by 1-index
+word-hyphen = $(word $2,$(subst -, ,$1))
+
 .EXPORT_ALL_VARIABLES:
 
-.PHONY: bin/aws-ebs-csi-driver
+.PHONY: linux/$(ARCH)
+linux/$(ARCH): bin/aws-ebs-csi-driver
 bin/aws-ebs-csi-driver: | bin
-	CGO_ENABLED=0 GOOS=linux go build -mod=vendor -ldflags ${LDFLAGS} -o bin/aws-ebs-csi-driver ./cmd/
+	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build -mod=vendor -ldflags ${LDFLAGS} -o bin/aws-ebs-csi-driver ./cmd/
 
-.PHONY: bin/aws-ebs-csi-driver.exe
+.PHONY: windows/$(ARCH)
+windows/$(ARCH): bin/aws-ebs-csi-driver.exe
 bin/aws-ebs-csi-driver.exe: | bin
-	CGO_ENABLED=0 GOOS=windows go build -mod=vendor -ldflags ${LDFLAGS} -o bin/aws-ebs-csi-driver.exe ./cmd/
+	CGO_ENABLED=0 GOOS=windows GOARCH=$(ARCH) go build -mod=vendor -ldflags ${LDFLAGS} -o bin/aws-ebs-csi-driver.exe ./cmd/
+
+# Builds all linux images (not windows because it can't be exported with OUTPUT_TYPE=docker)
+all: all-image-docker
+
+# Builds all linux and windows images and pushes them
+all-push: all-image-registry push-manifest
+
+push-manifest: create-manifest all-annotate-manifest
+	docker manifest push --purge $(IMAGE):$(TAG)
+
+create-manifest:
+# sed expression:
+# LHS: match 0 or more not space characters
+# RHS: replace with $(IMAGE):$(TAG)-& where & is what was matched on LHS
+	docker manifest create --amend $(IMAGE):$(TAG) $(shell echo $(ALL_OS_ARCH_OSVERSION) | sed -e "s~[^ ]*~$(IMAGE):$(TAG)\-&~g")
+
+all-annotate-manifest: $(addprefix sub-annotate-manifest-,$(ALL_OS_ARCH_OSVERSION))
+
+sub-annotate-manifest-%:
+	$(MAKE) OS=$(call word-hyphen,$*,1) ARCH=$(call word-hyphen,$*,2) OSVERSION=$(call word-hyphen,$*,3) annotate-manifest
+
+annotate-manifest: .annotate-manifest-$(OS)-$(ARCH)-$(OSVERSION)
+.annotate-manifest-$(OS)-$(ARCH)-$(OSVERSION):
+	set -x; docker manifest annotate --os $(OS) --arch $(ARCH) --os-version $(OSVERSION) $(IMAGE):$(TAG) $(IMAGE):$(TAG)-$(OS)-$(ARCH)-$(OSVERSION)
+
+# only linux for OUTPUT_TYPE=docker because windows image cannot be exported
+# "Currently, multi-platform images cannot be exported with the docker export type. The most common usecase for multi-platform images is to directly push to a registry (see registry)."
+# https://docs.docker.com/engine/reference/commandline/buildx_build/#output
+all-image-docker: $(addprefix sub-image-docker-,$(ALL_OS_ARCH_OSVERSION_linux))
+all-image-registry: $(addprefix sub-image-registry-,$(ALL_OS_ARCH_OSVERSION))
+
+sub-image-%:
+	$(MAKE) OUTPUT_TYPE=$(call word-hyphen,$*,1) OS=$(call word-hyphen,$*,2) ARCH=$(call word-hyphen,$*,3) OSVERSION=$(call word-hyphen,$*,4) image
+
+image: .image-$(TAG)-$(OS)-$(ARCH)-$(OSVERSION)
+.image-$(TAG)-$(OS)-$(ARCH)-$(OSVERSION):
+	docker buildx build \
+		--platform=$(OS)/$(ARCH) \
+		--build-arg OS=$(OS) \
+		--build-arg ARCH=$(ARCH) \
+		--progress=plain \
+		--target=$(OS)-$(OSVERSION) \
+		--output=type=$(OUTPUT_TYPE) \
+		-t=$(IMAGE):$(TAG)-$(OS)-$(ARCH)-$(OSVERSION) \
+		.
+	touch $@
+
+.PHONY: clean
+clean:
+	rm -rf .*image-* bin/
 
 bin /tmp/helm /tmp/kubeval:
 	@mkdir -p $@
@@ -141,7 +216,6 @@ verify: verify-vendor
 verify-vendor:
 	@ echo; echo "### $@:"
 	@ ./hack/verify-vendor.sh
-
 
 .PHONY: generate-kustomize
 generate-kustomize: bin/helm

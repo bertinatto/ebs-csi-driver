@@ -7,10 +7,6 @@ jobs:
   buildx:
     # this is to prevent the job to run at forked projects
     if: github.repository == 'kubernetes-sigs/aws-ebs-csi-driver'
-    env:
-      IMAGE: aws-ebs-csi-driver
-      DEB_BUILD_TAG: aws-ebs-csi-driver:debian
-      AL2_BUILD_TAG: aws-ebs-csi-driver:amazonlinux
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -20,49 +16,32 @@ jobs:
         uses: docker/setup-buildx-action@v1
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
-      - name: Build debian target
-        run: |
-          docker buildx build \
-            -t $DEB_BUILD_TAG \
-            --platform=linux/arm64,linux/amd64 \
-            --output="type=image,push=false" . \
-            --target=debian-base
-      - name: Build amazonlinux target
-        run: |
-          docker buildx build \
-            -t $AL2_BUILD_TAG \
-            --platform=linux/arm64,linux/amd64 \
-            --output="type=image,push=false" . \
-            --target=amazonlinux
       - name: Set environment variables
         run: |
-          BRANCH=$(echo $GITHUB_REF | cut -d'/' -f3)
-          SHORT_SHA=$(echo $GITHUB_SHA | cut -c -7)
-          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
-          if [ "$BRANCH" = "master" ]; then
-            TAG=$SHORT_SHA
+          REGISTRY_NAME=docker.io/library/amazon
+          BRANCH_OR_TAG=$(echo $GITHUB_REF | cut -d'/' -f3)
+          if [ "$BRANCH_OR_TAG" = "master" ]; then
+            GIT_TAG=$GITHUB_SHA
           else
-            TAG=$BRANCH
+            GIT_TAG=$BRANCH_OR_TAG
           fi
-          echo "TAG=$TAG" >> $GITHUB_ENV
+          echo "REGISTRY_NAME=$REGISTRY_NAME" >> $GITHUB_ENV
+          echo "GIT_TAG=$GIT_TAG" >> $GITHUB_ENV
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Push debian target to Docker Hub
+      - name: Push manifest list containing debian and windows based images to Docker Hub
         run: |
-          DEB_PUSH_TAG="amazon/$IMAGE:$TAG"
-          docker buildx build \
-            -t $DEB_PUSH_TAG \
-            --platform=linux/arm64,linux/amd64 \
-            --output="type=image,push=true" . \
-            --target=debian-base
-      - name: Push amazonlinux target to Docker Hub
+          export REGISTRY=$REGISTRY_NAME
+          export TAG=$GIT_TAG
+          export ALL_OSVERSION_linux=debian
+          make all-push
+      - name: Push manifest containing amazon based image to Docker Hub
         run: |
-          AL2_PUSH_TAG="amazon/$IMAGE:$TAG-amazonlinux"
-          docker buildx build \
-            -t $AL2_PUSH_TAG \
-            --platform=linux/arm64,linux/amd64 \
-            --output="type=image,push=true" . \
-            --target=amazonlinux
+          export REGISTRY=$REGISTRY_NAME
+          export TAG=$GIT_TAG-amazonlinux
+          export ALL_OSVERSION_linux=amazon
+          export ALL_OS=linux
+          make all-push
