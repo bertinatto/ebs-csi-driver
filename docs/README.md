@@ -133,7 +133,7 @@ Following sections are Kubernetes specific. If you are Kubernetes user, use foll
 #### Set up driver permission
 The driver requires IAM permission to talk to Amazon EBS to manage the volume on user's behalf. [The example policy here](./example-iam-policy.json) defines these permissions. There are several methods to grant the driver IAM permission:
 * Using IAM [instance profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html) - attach the policy to the instance profile IAM role and turn on access to [instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html) for the instance(s) on which the driver Deployment will run
-* EKS only: Using [IAM roles for ServiceAccounts](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) - create an IAM role, attach the policy to it, then follow the IRSA documentation to associate the IAM role with the driver Deployment service account, which if you are installing via helm is determined by value `serviceAccount.controller.name`, `ebs-csi-controller-sa` by default
+* EKS only: Using [IAM roles for ServiceAccounts](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) - create an IAM role, attach the policy to it, then follow the IRSA documentation to associate the IAM role with the driver Deployment service account, which if you are installing via helm is determined by value `controller.serviceAccount.name`, `ebs-csi-controller-sa` by default
 * Using secret object - create an IAM user, attach the policy to it, put that user's credentials in [secret manifest](../deploy/kubernetes/secret.yaml), then deploy the secret
 ```sh
 curl https://raw.githubusercontent.com/kubernetes-sigs/aws-ebs-csi-driver/master/deploy/kubernetes/secret.yaml > secret.yaml
@@ -196,6 +196,53 @@ The following deprecated values have been removed, and you should now use their 
 * tolerations
 * topologySpreadConstraints
 * volumeAttachLimit
+
+The values under `serviceAccount.controller` have been relocated to `controller.serviceAccount`
+The values under `serviceAccount.node` have been relocated to `node.serviceAccount`
+
+The following `sidecars` values have been reorganized from
+```yaml
+sidecars:
+  provisionerImage:
+  attacherImage:
+  snapshotterImage:
+  livenessProbeImage:
+  resizerImage:
+  nodeDriverRegistrarImage:
+```
+to
+```yaml
+sidecars:
+  provisioner:
+    image:
+  attacher:
+    image:
+  snapshotter:
+    image:
+  livenessProbe:
+    image:
+  resizer:
+    image:
+  nodeDriverRegistrar:
+    image:
+```
+
+With the above reorganization `controller.containerResources` and `node.containerResources` were also moved into the sidecars structure as follows
+```yaml
+sidecars:
+  provisioner:
+    resources: {}
+  attacher:
+    resources: {}
+  snapshotter:
+    resources: {}
+  livenessProbe:
+    resources: {}
+  resizer:
+    resources: {}
+  nodeDriverRegistrar:
+    resources: {}
+```
 
 #### Deploy driver with debug mode
 To view driver debug logs, run the CSI driver with `-v=5` command line option

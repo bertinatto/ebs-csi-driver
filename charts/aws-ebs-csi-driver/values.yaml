@@ -8,24 +8,36 @@ image:
   pullPolicy: IfNotPresent
 
 sidecars:
-  provisionerImage:
-    repository: k8s.gcr.io/sig-storage/csi-provisioner
-    tag: "v2.1.1"
-  attacherImage:
-    repository: k8s.gcr.io/sig-storage/csi-attacher
-    tag: "v3.1.0"
-  snapshotterImage:
-    repository: k8s.gcr.io/sig-storage/csi-snapshotter
-    tag: "v3.0.3"
-  livenessProbeImage:
-    repository: k8s.gcr.io/sig-storage/livenessprobe
-    tag: "v2.2.0"
-  resizerImage:
-    repository: k8s.gcr.io/sig-storage/csi-resizer
-    tag: "v1.0.0"
-  nodeDriverRegistrarImage:
-    repository: k8s.gcr.io/sig-storage/csi-node-driver-registrar
-    tag: "v2.1.0"
+  provisioner:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-provisioner
+      tag: "v2.1.1"
+    resources: {}
+  attacher:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-attacher
+      tag: "v3.1.0"
+    resources: {}
+  snapshotter:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-snapshotter
+      tag: "v3.0.3"
+    resources: {}
+  livenessProbe:
+    image:
+      repository: k8s.gcr.io/sig-storage/livenessprobe
+      tag: "v2.2.0"
+    resources: {}
+  resizer:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-resizer
+      tag: "v1.0.0"
+    resources: {}
+  nodeDriverRegistrar:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-node-driver-registrar
+      tag: "v2.1.0"
+    resources: {}
 
 proxy:
   http_proxy:
@@ -69,13 +81,10 @@ controller:
   region:
   replicaCount: 2
   resources: {}
-  containerResources:
-    ebsPlugin: {}
-    provisioner: {}
-    attacher: {}
-    snapshotter: {}
-    resizer: {}
-    liveness: {}
+  serviceAccount:
+    create: true # A service account will be created for you if set to true. Set to false if you want to use your own.
+    name: ebs-csi-controller-sa # Name of the service-account to be used/created.
+    annotations: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -115,22 +124,12 @@ node:
   tolerateAllTaints: false
   tolerations: []
   resources: {}
-  containerResources:
-    ebsPlugin: {}
-    nodeDriverRegistrar: {}
-    liveness: {}
-  # The "maximum number of attachable volumes" per node
-  volumeAttachLimit:
-
-serviceAccount:
-  controller:
-    create: true # A service account will be created for you if set to true. Set to false if you want to use your own.
-    name: ebs-csi-controller-sa # Name of the service-account to be used/created.
-    annotations: {}
-  node:
+  serviceAccount:
     create: true
     name: ebs-csi-node-sa
     annotations: {}
+  # The "maximum number of attachable volumes" per node
+  volumeAttachLimit:
 
 storageClasses: []
 # Add StorageClass resources like:

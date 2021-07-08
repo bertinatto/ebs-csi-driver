@@ -29,7 +29,7 @@ spec:
         {{- with .Values.controller.nodeSelector }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      serviceAccountName: {{ .Values.serviceAccount.controller.name }}
+      serviceAccountName: {{ .Values.controller.serviceAccount.name }}
       priorityClassName: {{ .Values.controller.priorityClassName }}
       {{- with default .Values.controller.affinity }}
       affinity:
@@ -133,12 +133,12 @@ spec:
             timeoutSeconds: 3
             periodSeconds: 10
             failureThreshold: 5
-          {{- with default .Values.controller.resources .Values.controller.containerResources.ebsPlugin }}
+          {{- with .Values.controller.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
         - name: csi-provisioner
-          image: {{ printf "%s:%s" .Values.sidecars.provisionerImage.repository .Values.sidecars.provisionerImage.tag }}
+          image: {{ printf "%s:%s" .Values.sidecars.provisioner.image.repository .Values.sidecars.provisioner.image.tag }}
           args:
             - --csi-address=$(ADDRESS)
             - --v=5
@@ -160,12 +160,12 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
-          {{- with default .Values.controller.resources .Values.controller.containerResources.provisioner }}
+          {{- with default .Values.controller.resources .Values.sidecars.provisioner.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
         - name: csi-attacher
-          image: {{ printf "%s:%s" .Values.sidecars.attacherImage.repository .Values.sidecars.attacherImage.tag }}
+          image: {{ printf "%s:%s" .Values.sidecars.attacher.image.repository .Values.sidecars.attacher.image.tag }}
           args:
             - --csi-address=$(ADDRESS)
             - --v=5
@@ -182,13 +182,13 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
-          {{- with default .Values.controller.resources .Values.controller.containerResources.attacher }}
+          {{- with default .Values.controller.resources .Values.sidecars.attacher.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
         {{- if .Capabilities.APIVersions.Has "snapshot.storage.k8s.io/v1" }}
         - name: csi-snapshotter
-          image: {{ printf "%s:%s" .Values.sidecars.snapshotterImage.repository .Values.sidecars.snapshotterImage.tag }}
+          image: {{ printf "%s:%s" .Values.sidecars.snapshotter.image.repository .Values.sidecars.snapshotter.image.tag }}
           args:
             - --csi-address=$(ADDRESS)
             - --leader-election=true
@@ -204,13 +204,13 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
-          {{- with default .Values.controller.resources .Values.controller.containerResources.snapshotter }}
+          {{- with default .Values.controller.resources .Values.sidecars.snapshotter.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
         {{- end }}
         - name: csi-resizer
-          image: {{ printf "%s:%s" .Values.sidecars.resizerImage.repository .Values.sidecars.resizerImage.tag }}
+          image: {{ printf "%s:%s" .Values.sidecars.resizer.image.repository .Values.sidecars.resizer.image.tag }}
           imagePullPolicy: Always
           args:
             - --csi-address=$(ADDRESS)
@@ -227,18 +227,18 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
-          {{- with default .Values.controller.resources .Values.controller.containerResources.resizer }}
+          {{- with default .Values.controller.resources .Values.sidecars.resizer.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
         - name: liveness-probe
-          image: {{ printf "%s:%s" .Values.sidecars.livenessProbeImage.repository .Values.sidecars.livenessProbeImage.tag }}
+          image: {{ printf "%s:%s" .Values.sidecars.livenessProbe.image.repository .Values.sidecars.livenessProbe.image.tag }}
           args:
             - --csi-address=/csi/csi.sock
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
-          {{- with default .Values.controller.resources .Values.controller.containerResources.liveness }}
+          {{- with default .Values.controller.resources .Values.sidecars.livenessProbe.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}

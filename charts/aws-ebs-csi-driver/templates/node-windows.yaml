@@ -33,7 +33,7 @@ spec:
         {{- with .Values.node.nodeSelector }}
 {{ toYaml . | indent 8 }}
         {{- end }}
-      serviceAccountName: {{ .Values.serviceAccount.node.name }}
+      serviceAccountName: {{ .Values.node.serviceAccount.name }}
       priorityClassName: {{ .Values.node.priorityClassName | default "system-cluster-critical" }}
       tolerations:
         {{- if .Values.node.tolerateAllTaints }}
@@ -94,11 +94,11 @@ spec:
             timeoutSeconds: 3
             periodSeconds: 10
             failureThreshold: 5
-          {{- with default .Values.node.resources .Values.node.containerResources.ebsPlugin }}
+          {{- with .Values.node.resources }}
           resources: {{ toYaml . | nindent 12 }}
           {{- end }}
         - name: node-driver-registrar
-          image: {{ printf "%s:%s" .Values.sidecars.nodeDriverRegistrarImage.repository .Values.sidecars.nodeDriverRegistrarImage.tag }}
+          image: {{ printf "%s:%s" .Values.sidecars.nodeDriverRegistrar.image.repository .Values.sidecars.nodeDriverRegistrar.image.tag }}
           args:
             - --csi-address=$(ADDRESS)
             - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
@@ -121,17 +121,17 @@ spec:
               mountPath: C:\csi
             - name: registration-dir
               mountPath: C:\registration
-          {{- with default .Values.node.resources .Values.node.containerResources.nodeDriverRegistrar }}
+          {{- with default .Values.node.resources .Values.sidecars.nodeDriverRegistrar.resources }}
           resources: {{ toYaml . | nindent 12 }}
           {{- end }}
         - name: liveness-probe
-          image: {{ printf "%s:%s" .Values.sidecars.livenessProbeImage.repository .Values.sidecars.livenessProbeImage.tag }}
+          image: {{ printf "%s:%s" .Values.sidecars.livenessProbe.image.repository .Values.sidecars.livenessProbe.image.tag }}
           args:
             - --csi-address=unix:/csi/csi.sock
           volumeMounts:
             - name: plugin-dir
               mountPath: C:\csi
-          {{- with default .Values.node.resources .Values.node.containerResources.liveness }}
+          {{- with default .Values.node.resources .Values.sidecars.livenessProbe.resources }}
           resources: {{ toYaml . | nindent 12 }}
           {{- end }}
       {{- if .Values.imagePullSecrets }}
