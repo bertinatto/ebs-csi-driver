@@ -141,7 +141,7 @@ spec:
           image: {{ printf "%s:%s" .Values.sidecars.provisioner.image.repository .Values.sidecars.provisioner.image.tag }}
           args:
             - --csi-address=$(ADDRESS)
-            - --v=5
+            - --v={{ .Values.sidecars.provisioner.logLevel }}
             - --feature-gates=Topology=true
             {{- if .Values.controller.extraCreateMetadata }}
             - --extra-create-metadata
@@ -168,7 +168,7 @@ spec:
           image: {{ printf "%s:%s" .Values.sidecars.attacher.image.repository .Values.sidecars.attacher.image.tag }}
           args:
             - --csi-address=$(ADDRESS)
-            - --v=5
+            - --v={{ .Values.sidecars.attacher.logLevel }}
             - --leader-election=true
           env:
             - name: ADDRESS
@@ -214,7 +214,7 @@ spec:
           imagePullPolicy: Always
           args:
             - --csi-address=$(ADDRESS)
-            - --v=5
+            - --v={{ .Values.sidecars.resizer.logLevel }}
           env:
             - name: ADDRESS
               value: /var/lib/csi/sockets/pluginproxy/csi.sock

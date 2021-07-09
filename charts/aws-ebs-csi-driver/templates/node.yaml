@@ -107,7 +107,7 @@ spec:
           args:
             - --csi-address=$(ADDRESS)
             - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
-            - --v=5
+            - --v={{ .Values.sidecars.nodeDriverRegistrar.logLevel }}
           env:
             - name: ADDRESS
               value: /csi/csi.sock

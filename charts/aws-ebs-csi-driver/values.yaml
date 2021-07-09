@@ -12,16 +12,19 @@ sidecars:
     image:
       repository: k8s.gcr.io/sig-storage/csi-provisioner
       tag: "v2.1.1"
+    logLevel: 2
     resources: {}
   attacher:
     image:
       repository: k8s.gcr.io/sig-storage/csi-attacher
       tag: "v3.1.0"
+    logLevel: 2
     resources: {}
   snapshotter:
     image:
       repository: k8s.gcr.io/sig-storage/csi-snapshotter
       tag: "v3.0.3"
+    logLevel: 2
     resources: {}
   livenessProbe:
     image:
@@ -32,11 +35,13 @@ sidecars:
     image:
       repository: k8s.gcr.io/sig-storage/csi-resizer
       tag: "v1.0.0"
+    logLevel: 2
     resources: {}
   nodeDriverRegistrar:
     image:
       repository: k8s.gcr.io/sig-storage/csi-node-driver-registrar
       tag: "v2.1.0"
+    logLevel: 2
     resources: {}
 
 proxy:

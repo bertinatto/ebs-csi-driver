@@ -58,7 +58,7 @@ spec:
             - --volume-attach-limit={{ . }}
             {{- end }}
             - --logtostderr
-            - --v=5
+            - --v={{ .Values.node.logLevel }}
           env:
             - name: CSI_ENDPOINT
               value: unix:/csi/csi.sock
@@ -102,7 +102,7 @@ spec:
           args:
             - --csi-address=$(ADDRESS)
             - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
-            - --v=5
+            - --v={{ .Values.sidecars.nodeDriverRegistrar.logLevel }}
           env:
             - name: ADDRESS
               value: unix:/csi/csi.sock
