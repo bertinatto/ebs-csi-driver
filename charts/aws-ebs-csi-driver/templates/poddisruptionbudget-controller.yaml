@@ -1,4 +1,3 @@
-{{- $replicas := (default .Values.replicaCount .Values.controller.replicaCount) | int }}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
@@ -10,8 +9,8 @@ spec:
     matchLabels:
       app: ebs-csi-controller
       {{- include "aws-ebs-csi-driver.selectorLabels" . | nindent 6 }}
-  {{- if le $replicas 2 }}
+  {{- if le (.Values.controller.replicaCount | int) 2 }}
   maxUnavailable: 1
   {{- else }}
   minAvailable: 2
-{{- end }}
+  {{- end }}

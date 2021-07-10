@@ -33,7 +33,7 @@ spec:
         {{- with .Values.node.nodeSelector }}
 {{ toYaml . | indent 8 }}
         {{- end }}
-      serviceAccountName: {{ .Values.serviceAccount.node.name }}
+      serviceAccountName: {{ .Values.node.serviceAccount.name }}
       priorityClassName: {{ .Values.node.priorityClassName | default "system-cluster-critical" }}
       tolerations:
         {{- if .Values.node.tolerateAllTaints }}
@@ -54,11 +54,11 @@ spec:
           args:
             - node
             - --endpoint=$(CSI_ENDPOINT)
-            {{- if .Values.volumeAttachLimit }}
-            - --volume-attach-limit={{ .Values.volumeAttachLimit }}
+            {{- with .Values.node.volumeAttachLimit }}
+            - --volume-attach-limit={{ . }}
             {{- end }}
             - --logtostderr
-            - --v=5
+            - --v={{ .Values.node.logLevel }}
           env:
             - name: CSI_ENDPOINT
               value: unix:/csi/csi.sock
@@ -94,21 +94,15 @@ spec:
             timeoutSeconds: 3
             periodSeconds: 10
             failureThreshold: 5
-          {{- if .Values.node.resources }}
           {{- with .Values.node.resources }}
           resources: {{ toYaml . | nindent 12 }}
           {{- end }}
-          {{- else }}
-          {{- with .Values.resources }}
-          resources: {{ toYaml . | nindent 12 }}
-          {{- end }}
-          {{- end }}
         - name: node-driver-registrar
-          image: {{ printf "%s:%s" .Values.sidecars.nodeDriverRegistrarImage.repository .Values.sidecars.nodeDriverRegistrarImage.tag }}
+          image: {{ printf "%s:%s" .Values.sidecars.nodeDriverRegistrar.image.repository .Values.sidecars.nodeDriverRegistrar.image.tag }}
           args:
             - --csi-address=$(ADDRESS)
             - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
-            - --v=5
+            - --v={{ .Values.sidecars.nodeDriverRegistrar.logLevel }}
           env:
             - name: ADDRESS
               value: unix:/csi/csi.sock
@@ -127,30 +121,18 @@ spec:
               mountPath: C:\csi
             - name: registration-dir
               mountPath: C:\registration
-          {{- if .Values.node.resources }}
-          {{- with .Values.node.resources }}
+          {{- with default .Values.node.resources .Values.sidecars.nodeDriverRegistrar.resources }}
           resources: {{ toYaml . | nindent 12 }}
-          {{- end }}
-          {{- else }}
-          {{- with .Values.resources }}
-          resources: {{ toYaml . | nindent 12 }}
-          {{- end }}
           {{- end }}
         - name: liveness-probe
-          image: {{ printf "%s:%s" .Values.sidecars.livenessProbeImage.repository .Values.sidecars.livenessProbeImage.tag }}
+          image: {{ printf "%s:%s" .Values.sidecars.livenessProbe.image.repository .Values.sidecars.livenessProbe.image.tag }}
           args:
             - --csi-address=unix:/csi/csi.sock
           volumeMounts:
             - name: plugin-dir
               mountPath: C:\csi
-          {{- if .Values.node.resources }}
-          {{- with .Values.node.resources }}
+          {{- with default .Values.node.resources .Values.sidecars.livenessProbe.resources }}
           resources: {{ toYaml . | nindent 12 }}
-          {{- end }}
-          {{- else }}
-          {{- with .Values.resources }}
-          resources: {{ toYaml . | nindent 12 }}
-          {{- end }}
           {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:

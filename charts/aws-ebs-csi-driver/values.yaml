@@ -8,30 +8,41 @@ image:
   pullPolicy: IfNotPresent
 
 sidecars:
-  provisionerImage:
-    repository: k8s.gcr.io/sig-storage/csi-provisioner
-    tag: "v2.1.1"
-  attacherImage:
-    repository: k8s.gcr.io/sig-storage/csi-attacher
-    tag: "v3.1.0"
-  snapshotterImage:
-    repository: k8s.gcr.io/sig-storage/csi-snapshotter
-    tag: "v3.0.3"
-  livenessProbeImage:
-    repository: k8s.gcr.io/sig-storage/livenessprobe
-    tag: "v2.2.0"
-  resizerImage:
-    repository: k8s.gcr.io/sig-storage/csi-resizer
-    tag: "v1.0.0"
-  nodeDriverRegistrarImage:
-    repository: k8s.gcr.io/sig-storage/csi-node-driver-registrar
-    tag: "v2.1.0"
-
-snapshotController:
-  repository: k8s.gcr.io/sig-storage/snapshot-controller
-  tag: "v3.0.3"
-  podAnnotations: {}
-  podLabels: {}
+  provisioner:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-provisioner
+      tag: "v2.1.1"
+    logLevel: 2
+    resources: {}
+  attacher:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-attacher
+      tag: "v3.1.0"
+    logLevel: 2
+    resources: {}
+  snapshotter:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-snapshotter
+      tag: "v3.0.3"
+    logLevel: 2
+    resources: {}
+  livenessProbe:
+    image:
+      repository: k8s.gcr.io/sig-storage/livenessprobe
+      tag: "v2.2.0"
+    resources: {}
+  resizer:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-resizer
+      tag: "v1.0.0"
+    logLevel: 2
+    resources: {}
+  nodeDriverRegistrar:
+    image:
+      repository: k8s.gcr.io/sig-storage/csi-node-driver-registrar
+      tag: "v2.1.0"
+    logLevel: 2
+    resources: {}
 
 proxy:
   http_proxy:
@@ -40,23 +51,6 @@ proxy:
 imagePullSecrets: []
 nameOverride:
 fullnameOverride:
-
-# True if enable volume snapshot
-enableVolumeSnapshot: false
-
-# Moving to values under controller
-affinity: {}
-extraCreateMetadata: true
-extraVolumeTags: {}
-k8sTagClusterId:
-nodeSelector: {}
-podAnnotations: {}
-priorityClassName: "system-cluster-critical"
-region:
-replicaCount: 2
-resources: {}
-tolerations: []
-topologySpreadConstraints: []
 
 controller:
   affinity: {}
@@ -84,21 +78,18 @@ controller:
   nodeSelector: {}
   podAnnotations: {}
   podLabels: {}
-  priorityClassName:
+  priorityClassName: system-cluster-critical
   # AWS region to use. If not specified then the region will be looked up via the AWS EC2 metadata
   # service.
   # ---
   # region: us-east-1
   region:
-  replicaCount:
+  replicaCount: 2
   resources: {}
-  containerResources:
-    ebsPlugin: {}
-    provisioner: {}
-    attacher: {}
-    snapshotter: {}
-    resizer: {}
-    liveness: {}
+  serviceAccount:
+    create: true # A service account will be created for you if set to true. Set to false if you want to use your own.
+    name: ebs-csi-controller-sa # Name of the service-account to be used/created.
+    annotations: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -125,10 +116,6 @@ controller:
   #    whenUnsatisfiable: ScheduleAnyway
   topologySpreadConstraints: []
 
-# Moving to values under node
-# The "maximum number of attachable volumes" per node
-volumeAttachLimit:
-
 node:
   env:
     ebsPlugin: []
@@ -142,25 +129,12 @@ node:
   tolerateAllTaints: false
   tolerations: []
   resources: {}
-  containerResources:
-    ebsPlugin: {}
-    nodeDriverRegistrar: {}
-    liveness: {}
-  volumeAttachLimit:
-
-serviceAccount:
-  controller:
-    create: true # A service account will be created for you if set to true. Set to false if you want to use your own.
-    name: ebs-csi-controller-sa # Name of the service-account to be used/created.
-    annotations: {}
-  snapshot:
-    create: true
-    name: ebs-snapshot-controller
-    annotations: {}
-  node:
+  serviceAccount:
     create: true
     name: ebs-csi-node-sa
     annotations: {}
+  # The "maximum number of attachable volumes" per node
+  volumeAttachLimit:
 
 storageClasses: []
 # Add StorageClass resources like:

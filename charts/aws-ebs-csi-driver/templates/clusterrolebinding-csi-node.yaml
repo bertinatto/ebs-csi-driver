@@ -7,7 +7,7 @@ metadata:
     {{- include "aws-ebs-csi-driver.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.serviceAccount.node.name }}
+    name: {{ .Values.node.serviceAccount.name }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole

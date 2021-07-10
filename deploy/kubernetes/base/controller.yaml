@@ -84,7 +84,7 @@ spec:
           image: k8s.gcr.io/sig-storage/csi-provisioner:v2.1.1
           args:
             - --csi-address=$(ADDRESS)
-            - --v=5
+            - --v=2
             - --feature-gates=Topology=true
             - --extra-create-metadata
             - --leader-election=true
@@ -99,7 +99,7 @@ spec:
           image: k8s.gcr.io/sig-storage/csi-attacher:v3.1.0
           args:
             - --csi-address=$(ADDRESS)
-            - --v=5
+            - --v=2
             - --leader-election=true
           env:
             - name: ADDRESS
@@ -123,7 +123,7 @@ spec:
           imagePullPolicy: Always
           args:
             - --csi-address=$(ADDRESS)
-            - --v=5
+            - --v=2
           env:
             - name: ADDRESS
               value: /var/lib/csi/sockets/pluginproxy/csi.sock
