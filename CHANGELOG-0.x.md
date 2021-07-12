@@ -1,7 +1,7 @@
 # v1.1.1
 
 ### Bug fixes
-- update inFlight cache to avoid race condition on volume operation ([#924])(https://github.com/kubernetes-sigs/aws-ebs-csi-driver/pull/924), [@AndyXiangLi](https://github.com/AndyXiangLi))
+- update inFlight cache to avoid race condition on volume operation ([#924](https://github.com/kubernetes-sigs/aws-ebs-csi-driver/pull/924), [@AndyXiangLi](https://github.com/AndyXiangLi))
 
 # v1.1.0
 
