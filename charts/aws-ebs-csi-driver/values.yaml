@@ -59,6 +59,8 @@ tolerations: []
 topologySpreadConstraints: []
 
 controller:
+  # If arbitrary args like "--aws-sdk-debug-log=true" need to be passed, use this value
+  additionalArgs: []
   affinity: {}
   # True if enable volume scheduling for dynamic volume provisioning
   env:

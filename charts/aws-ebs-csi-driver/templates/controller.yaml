@@ -78,6 +78,9 @@ spec:
             {{- end }}
             - --logtostderr
             - --v={{ .Values.controller.logLevel }}
+            {{- range .Values.controller.additionalArgs }}
+            - {{ . }}
+            {{- end }}
           env:
             - name: CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
